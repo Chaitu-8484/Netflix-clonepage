@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="A movie streaming UI demo created by Chaitanya. For educational use only.">
+<meta name="robots" content="index, follow">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MovieFlix Clone</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; font-family: Arial, sans-serif; background-color: #000; color: #fff; }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background-color: rgba(0,0,0,0.8); }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: #E50914; letter-spacing: 1px; cursor:pointer; }
+  nav { display: flex; align-items: center; gap: 1rem; }
+  nav a, select, button { color: #fff; background: none; border: none; cursor: pointer; font-size: 1rem; }
+  .hero { padding: 6rem 2rem; text-align: center; color: #fff;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%),
+                url('https://image.tmdb.org/t/p/w500/tnAuB8q5vv7Ax9UAEje5Xi4BXik.jpg') center/cover no-repeat; 
+  }
+  .hero h1 { font-size: 3rem; max-width: 700px; margin: auto; }
+  .hero p { font-size: 1.2rem; color: #ddd; margin-top: 0.5rem; }
+  .email-form { margin-top: 1rem; }
+  .email-form input { padding: 0.8rem; width: 300px; border: none; outline: none; }
+  .email-form button { padding: 0.9rem 1.2rem; background: #E50914; color: #fff; border: none; cursor: pointer; }
+  .movie-row { padding: 1rem 2rem; }
+  .movie-row h2 { margin-bottom: 0.5rem; }
+  .movie-thumbnails { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+  .movie-thumbnails img { width: 200px; height: 300px; object-fit: cover; border-radius: 5px; transition: transform 0.3s ease; display: block; }
+  .movie-thumbnails img:hover { transform: scale(1.1); }
+  .form-box { background: rgba(0,0,0,0.85); padding: 2rem; border-radius: 10px; width: 300px; margin: 5rem auto; }
+  .form-box input { width: 100%; padding: 0.8rem; margin: 0.5rem 0; border: none; border-radius: 5px; }
+  .form-box button { width: 100%; padding: 0.9rem; margin-top: 1rem; background: #E50914; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+  .form-box button:hover { background: #f40612; }
+  .page { display: none; }
+  .active { display: block; }
+  .profile-container { position: relative; display: inline-block; }
+  
+  /* Small profile icon like original MovieFlix */
+  .profile-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .dropdown-menu { display: none; position: absolute; right: 0; background: #141414; border-radius: 5px; padding: 0.5rem 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5); z-index: 100; }
+  .dropdown-menu a { display: block; padding: 0.5rem 1rem; color: #fff; text-decoration: none; font-size: 0.9rem; }
+  .dropdown-menu a:hover { background: #333; }
+  .profile-pic-large { width:100px; height:100px; border-radius:50%; margin:10px auto; display:block; }
+
+  /* Fade-in-from-bottom animation */
+  @keyframes fadeInUp { 0% { opacity:0; transform:translateY(30px);} 100% {opacity:1; transform:translateY(0);} }
+  .fade-up { opacity:0; animation: fadeInUp 1s ease forwards; }
+  .fade-up.delay { animation-delay:0.5s; }
+
+  @media (max-width: 600px){
+    .hero { padding: 2rem 1rem; }
+    .movie-thumbnails img { width: 45%; height: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Home Page (Landing with Email "Get Started") -->
+<div id="home" class="page active">
+  <header>
+    <div class="logo" onclick="currentUser?showPage('home'):showPage('signup')">MovieFlix</div>
+    <nav id="navMenu"></nav>
+  </header>
+  <section class="hero" id="heroSection">
+    <div class="email-form">
+      <form onsubmit="goToSignup(event)">
+        <input type="email" id="startEmail" placeholder="Email address" required>
+        <button type="submit">Get Started ></button>
+      </form>
+    </div>
+  </section>
+  <section class="movie-row">
+    <h2>Popular on MovieFlix</h2>
+    <div class="movie-thumbnails">
+      <img src="https://image.tmdb.org/t/p/w500/tnAuB8q5vv7Ax9UAEje5Xi4BXik.jpg">
+      <img src="https://image.tmdb.org/t/p/w500/rSPw7tgCH9c6NqICZef4kZjFOQ5.jpg">
+      <img src="https://image.tmdb.org/t/p/w500/5YZbUmjbMa3ClvSW1Wj3D6XGolb.jpg">
+      <img src="https://image.tmdb.org/t/p/w500/2I5eBh98Q4aPq8WdQrHdTC8ARhY.jpg">
+      <img src="https://image.tmdb.org/t/p/w500/1XSYOP0JjjyMz1irihvWywro82r.jpg">
+      <img src="https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg">
+    </div>
+  </section>
+</div>
+
+<!-- Signup Page -->
+<div id="signup" class="page">
+  <div class="form-box">
+    <h2>Create Account</h2>
+    <form onsubmit="signup(event)">
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="tel" id="phone" placeholder="Phone Number" required>
+      <input type="email" id="email" placeholder="Email Address" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+</div>
+
+<!-- Signin Page -->
+<div id="signin" class="page">
+  <div class="form-box">
+    <h2>Sign In</h2>
+    <form onsubmit="signin(event)">
+      <input type="email" id="loginEmail" placeholder="Email Address" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <button type="submit">Sign In</button>
+    </form>
+    <p>New to MovieFlix? <a href="#" onclick="showPage('signup')">Sign up now</a></p>
+  </div>
+</div>
+
+<!-- Profile Page -->
+<div id="profile" class="page">
+  <header>
+    <div class="logo" onclick="showPage('home')">MovieFlix</div>
+    <nav id="navMenu"></nav>
+  </header>
+  <div class="form-box">
+    <h2>My Profile</h2>
+    <img id="profilePic" src="https://i.imgur.com/0y0y0y0.png" class="profile-pic-large">
+    <input type="file" id="uploadPic" accept="image/*">
+    <p><strong>Name:</strong> <span id="pName"></span></p>
+    <p><strong>Email:</strong> <span id="pEmail"></span></p>
+    <p><strong>Phone:</strong> <span id="pPhone"></span></p>
+    <button onclick="showChangePassword()">Change Password</button>
+  </div>
+</div>
+
+<!-- Change Password Page -->
+<div id="changePassword" class="page">
+  <div class="form-box">
+    <h2>Change Password</h2>
+    <input type="password" id="oldPassword" placeholder="Old Password">
+    <input type="password" id="newPassword" placeholder="New Password">
+    <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+    <button onclick="updatePassword()">Update Password</button>
+    <button onclick="showProfile()">Back</button>
+  </div>
+</div>
+
+<script>
+let currentUser = JSON.parse(localStorage.getItem("currentUser")) || null;
+
+// Store a reusable copy of the default hero (email "Get Started") so we can restore it on sign out
+const defaultHeroHTML = `
+  <div class="email-form">
+    <form onsubmit="goToSignup(event)">
+      <input type="email" id="startEmail" placeholder="Email address" required>
+      <button type="submit">Get Started ></button>
+    </form>
+  </div>
+`;
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function resetHomeHero(){
+  const hero = document.querySelector('#home .hero');
+  if(hero){
+    hero.innerHTML = defaultHeroHTML; // put back the email "Get Started" UI
+    hero.style.background = `linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%), url('https://image.tmdb.org/t/p/w500/tnAuB8q5vv7Ax9UAEje5Xi4BXik.jpg') center/cover no-repeat`;
+  }
+}
+
+function goToSignup(e){
+  e.preventDefault();
+  const email = document.getElementById("startEmail")?.value;
+  showPage('signup');
+  if(email) document.getElementById("email").value = email;
+}
+
+function getUsers(){ return JSON.parse(localStorage.getItem("netflixUsers")) || []; }
+function saveUsers(users){ localStorage.setItem("netflixUsers", JSON.stringify(users)); }
+
+function signup(e){
+  e.preventDefault();
+  const users = getUsers();
+  const newUser = {
+    name: document.getElementById("name").value,
+    phone: document.getElementById("phone").value,
+    email: document.getElementById("email").value,
+    password: document.getElementById("password").value,
+    profilePic: "https://i.imgur.com/0y0y0y0.png"
+  };
+  if(users.find(u => u.email===newUser.email)){
+    alert("Email already registered. Please sign in instead.");
+    showPage('signin');
+    return;
+  }
+  users.push(newUser);
+  saveUsers(users);
+  localStorage.setItem("currentUser", JSON.stringify(newUser));
+  currentUser = newUser;
+  showWelcome(newUser,true);
+}
+
+function signin(e){
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPassword").value;
+  const users = getUsers();
+  const user = users.find(u => u.email===email && u.password===pass);
+  if(user){ 
+    localStorage.setItem("currentUser", JSON.stringify(user));
+    currentUser = user;
+    showWelcome(user,false);
+  }
+  else alert("Invalid login");
+}
+
+function showProfileMenu(){
+  if(!currentUser) return;
+  document.getElementById("navMenu").innerHTML = `
+    <div class="profile-container">
+      <img src="${currentUser.profilePic}" class="profile-icon" onclick="toggleDropdown()">
+      <div id="dropdown" class="dropdown-menu">
+        <a href="#" onclick="showProfile();closeDropdown()">My Profile</a>
+        <a href="#" onclick="showChangePassword();closeDropdown()">Change Password</a>
+        <a href="#" onclick="signOut();closeDropdown()">Sign Out</a>
+      </div>
+    </div>
+  `;
+}
+
+function toggleDropdown(){
+  const menu = document.getElementById("dropdown");
+  menu.style.display = menu.style.display==="block"?"none":"block";
+}
+function closeDropdown(){ const menu=document.getElementById("dropdown"); if(menu) menu.style.display="none"; }
+
+function showWelcome(user,isNew){
+  showPage('home');
+  const hero = document.querySelector('#home .hero');
+  hero.style.background=`linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%), 
+                        url('https://image.tmdb.org/t/p/w500/tnAuB8q5vv7Ax9UAEje5Xi4BXik.jpg') center/cover no-repeat`;
+  hero.innerHTML=`
+    <h1 class="fade-up">${isNew?"Welcome, ":"Welcome back, "}${user.name}! 🎉</h1>
+    <p class="fade-up delay">Your account with ${user.email} has ${isNew?"been created successfully.":"signed in successfully."}</p>
+  `;
+  showProfileMenu();
+}
+
+function showProfile(){
+  if(currentUser){
+    document.getElementById("pName").textContent = currentUser.name;
+    document.getElementById("pEmail").textContent = currentUser.email;
+    document.getElementById("pPhone").textContent = currentUser.phone;
+    document.getElementById("profilePic").src = currentUser.profilePic;
+    showPage('profile');
+  }
+}
+
+document.getElementById("uploadPic").addEventListener("change", function(e){
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      document.getElementById("profilePic").src = ev.target.result;
+      currentUser.profilePic = ev.target.result;
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      let users = getUsers().map(u => u.email===currentUser.email?currentUser:u);
+      saveUsers(users);
+      showProfileMenu();
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+function showChangePassword(){ showPage('changePassword'); }
+
+function updatePassword(){
+  const oldPass = document.getElementById("oldPassword").value;
+  const newPass = document.getElementById("newPassword").value;
+  const confirmPass = document.getElementById("confirmPassword").value;
+  if(!currentUser) return;
+  if(newPass !== confirmPass){ alert("Passwords do not match"); return; }
+  if(currentUser.password === oldPass){
+    currentUser.password = newPass;
+    let users = getUsers().map(u => u.email===currentUser.email?currentUser:u);
+    saveUsers(users);
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    alert("Password updated successfully");
+    showProfile();
+  } else alert("Old password incorrect");
+}
+
+function signOut(){
+  // Clear session
+  localStorage.removeItem("currentUser");
+  currentUser = null;
+  // Reset header menu and landing hero (email "Get Started")
+  document.getElementById("navMenu").innerHTML = "";
+  resetHomeHero();
+  // Go to landing page
+  showPage('home');
+}
+
+window.onload = function(){
+  const savedUser = JSON.parse(localStorage.getItem("currentUser"));
+  if(savedUser){
+    currentUser = savedUser;
+    showWelcome(savedUser,false);
+  } else {
+    resetHomeHero(); // make sure landing shows the email "Get Started" UI on first load
+    showPage('home');
+  }
+}
+</script>
+</body>
+</html>
